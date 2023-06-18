@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,18 +8,22 @@ import java.net.Socket;
 public class Server {
 
     public static void main(String[] args) throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(8082)) {
-            Socket clientSocket = serverSocket.accept(); // ждем подключения
-
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        try (ServerSocket serverSocket = new ServerSocket(8082);
+             Socket clientSocket = serverSocket.accept();
+             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
             System.out.println("New connection accepted");
-            final String name = in.readLine();
-            out.println(String.format("Hi %s, your port is %d", name, clientSocket.getPort()));
 
+            while (true) { // вечный цикл Сервер будет ждать сообщений от Клиента.
+                final String name = in.readLine(); //получаем сообщение от клиента
+                if (name.equals("quit")) {
+                    // отправляем сообщение Клиенту.
+                    out.println("Сonnection terminated");
+                    break;
+                }
+                // отправляем сообщение Клиенту.
+                out.println(String.format("Hi %s, your port is %d", name, clientSocket.getPort()));
+            }
         }
-
     }
-
 }
-
